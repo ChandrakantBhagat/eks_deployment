@@ -24,7 +24,7 @@ pipeline {
         stage('Assume Role') {
             steps {
                 script {
-                    def roleArn = "arn:aws:iam::390403884474:role/devops_multiaccount"
+                    def roleArn = "arn:aws:iam::390403884474:role/devops"
                     def assumeRoleOutput = sh(script: "aws sts assume-role --role-arn ${roleArn} --role-session-name jenkins-deploy", returnStdout: true)
                     def json = readJSON(text: assumeRoleOutput)
                     env.AWS_ACCESS_KEY_ID = json.Credentials.AccessKeyId
