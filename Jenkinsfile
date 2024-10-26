@@ -21,15 +21,18 @@ pipeline {
     } 
 
     stages {
-        stage('Assume Role') {
+        stage('Assume Role') {        
             steps {
-                script {
-                    def roleArn = "arn:aws:iam::390403884474:role/devops"
-                    def assumeRoleOutput = sh(script: "aws sts assume-role --role-arn ${roleArn} --role-session-name jenkins-deploy", returnStdout: true)
-                    def json = readJSON(text: assumeRoleOutput)
-                    env.AWS_ACCESS_KEY_ID = json.Credentials.AccessKeyId
-                    env.AWS_SECRET_ACCESS_KEY = json.Credentials.SecretAccessKey
-                    env.AWS_SESSION_TOKEN = json.Credentials.SessionToken
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: '6ec2def6-6907-4fec-b555-c645ede51725']]) {
+                    script {
+                        def assumeRoleOutput = sh(script: 'aws sts assume-role --role-arn arn:aws:iam::390403884474:role/devops --role-session-name jenkins-deploy', 
+                        returnStdout: true)
+                        def jsonOutput = readJSON(text: assumeRoleOutput)
+                        env.AWS_ACCESS_KEY_ID = jsonOutput.Credentials.AccessKeyId
+                        env.AWS_SECRET_ACCESS_KEY = jsonOutput.Credentials.SecretAccessKey
+                        env.AWS_SESSION_TOKEN = jsonOutput.Credentials.SessionToken
+                    }
                 }
             }
         }
